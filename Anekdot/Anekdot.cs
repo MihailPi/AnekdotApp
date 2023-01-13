@@ -26,10 +26,7 @@ namespace AnekdotApp
         {
             try
             {
-                if (numberOfStory <= 0)
-                    throw new Exception("Нет анекдота с таким номером");
-                else
-                    return _allTextFromAllFile[numberOfStory - 1];
+                return _allTextFromAllFile[numberOfStory - 1];
             }
             catch (Exception)
             {

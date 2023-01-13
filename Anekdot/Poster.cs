@@ -11,10 +11,10 @@ namespace AnekdotApp
         private string _text;
         private string _pathToBackground;
         private readonly int _dpi = 96;
-        private readonly int _gap = 20;
+        private readonly int _gap = 170;
         private RenderTargetBitmap _bitmap;
-        private int _minFontSize = 18;
-        private int _maxFontSize = 50;
+        private int _minFontSize = 45;
+        private int _maxFontSize = 110;
         private int _minCharCount = 1;
         private int _maxCharCount = 500;
         private BitmapFrame _image;
@@ -23,13 +23,14 @@ namespace AnekdotApp
         private int FontSize { get; set; }
         private Brush PosterBrush { get; set; }
         private Typeface PosterFont { get; set; }
+        public int Counter { get; private set; }
 
         public Poster()
         {            
             RemoveNewLine = true;
             AutoSize = true;
             FontSize = 25;
-            PosterFont = new Typeface(new FontFamily("Sweet Mavka Script"),
+            PosterFont = new Typeface(new FontFamily("Nexa Script Light"),
                                       FontStyles.Normal,
                                       FontWeights.Bold,
                                       FontStretches.SemiCondensed);
@@ -64,18 +65,21 @@ namespace AnekdotApp
                 new FormattedText(_text, System.Globalization.CultureInfo.CurrentCulture,
                                   FlowDirection.LeftToRight, PosterFont, FontSize, PosterBrush, _dpi)
                 {
-                    MaxTextWidth = _image.Width - _gap * 2,
+                    MaxTextWidth = _image.PixelWidth - _gap,
                     TextAlignment = TextAlignment.Center,
-                    MaxTextHeight = _image.PixelHeight
+                    MaxTextHeight = _image.PixelHeight - FontSize,
             };
-            var drawingVisual = new DrawingVisual();
 
-            using(var drawingContext = drawingVisual.RenderOpen())
+            var drawingVisual = new DrawingVisual();
+            int xPointPosition = 50;
+            int yPointPosition = (int)((_image.PixelHeight / 2) - (formattedText.Extent / 2)) + 30;
+
+            using (var drawingContext = drawingVisual.RenderOpen())
             {
                 //  Создаем прямоугольник с фоном и помещаем в него текст
                 drawingContext.DrawImage(_image,
-                                        new Rect(0, 0, _image.Width, _image.Height));
-                drawingContext.DrawText(formattedText, new Point(_gap, _gap));
+                                        new Rect(0, 0, _image.PixelWidth, _image.PixelHeight));
+                drawingContext.DrawText(formattedText, new Point(xPointPosition, yPointPosition));
             }
 
             _bitmap = new RenderTargetBitmap(_image.PixelWidth, _image.PixelHeight,
@@ -87,7 +91,9 @@ namespace AnekdotApp
         {
             if (_text.Length > 500)
                 return;
-            var encoder = new JpegBitmapEncoder();
+            Counter++;
+
+            var encoder = new PngBitmapEncoder();
             encoder.Frames.Add(BitmapFrame.Create(_bitmap));
             using (var stream = File.Create(pathToSaveRender))
             {
@@ -106,7 +112,8 @@ namespace AnekdotApp
 
         private void RemoveExtraNewLine()
         {
-            _text = _text.Replace(Environment.NewLine, " ");
+            _text = _text.Replace(Environment.NewLine, "");
+            _text = _text.Replace("\t", "");
             _text.Trim();
         }
     }

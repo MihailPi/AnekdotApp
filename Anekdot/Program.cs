@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace AnekdotApp
 {
@@ -11,6 +12,7 @@ namespace AnekdotApp
             Console.WriteLine("Для старта нажмите Enter...");
             Console.ReadLine();
 
+            Stopwatch timer = new Stopwatch();
             string pathToBackground="";
             string pathToStories="";
             string pathToSave="";
@@ -35,7 +37,7 @@ namespace AnekdotApp
                     pathToStories = fileDialogText.FileName;
                 else
                     continue;
-                Console.WriteLine();
+                Console.WriteLine($"{pathToStories}\n");
 
                 Console.WriteLine("Выберете изображение для фона...(Нажмите Enter)");
                 Console.ReadLine();
@@ -43,7 +45,7 @@ namespace AnekdotApp
                     pathToBackground = fileDialogImage.FileName;
                 else
                     continue;
-                Console.WriteLine();
+                Console.WriteLine($"{pathToBackground}\n");
 
                 Console.WriteLine("Введите разделитель для текстового файла:");
                 separator = Console.ReadLine().ToCharArray()[0];
@@ -58,19 +60,27 @@ namespace AnekdotApp
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                     pathToSave = saveDialog.SelectedPath;
 
+                Console.WriteLine($"{pathToSave}\n");
                 Console.WriteLine(new string('_', 60));
                 Console.WriteLine("Рендерим...");
 
+                //  Запускаем таймер
+                timer.Start();
                 //  Создаем картинки
                 Poster poster = new Poster();
 
-                for (int i = 0; i < allStories.Count; i++)
+                foreach (string story in allStories)
                 {
-                    poster.Create(allStories[i], pathToBackground);
-                    poster.SaveRender(pathToSave + $@"\{i+1}.jpg");
+                    poster.Create(story, pathToBackground);
+                    poster.SaveRender(pathToSave + $@"\{poster.Counter}.png");
                 }
+                timer.Stop();
+
                 Console.WriteLine();
                 Console.WriteLine("Готово!");
+                Console.WriteLine($"Созданно {poster.Counter} картинок, за {timer.Elapsed.Seconds} сек...");
+                // Сбрасываем таймер
+                timer.Reset();
 
                 Console.WriteLine("Для продолжения нажмите Enter, для выхода q...");
                 if (Console.ReadKey().Key == ConsoleKey.Q)
